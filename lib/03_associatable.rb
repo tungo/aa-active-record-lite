@@ -10,7 +10,7 @@ class AssocOptions
   )
 
   def model_class
-    # ...
+    @model_class ||= class_name.constantize
   end
 
   def table_name
