@@ -70,7 +70,6 @@ class SQLObject
   end
 
   def initialize(params = {})
-    columns = self.class.columns
     params.each do |key, value|
       key = key.to_sym
       raise "unknown attribute '#{key}'" unless columns.include?(key)
@@ -84,33 +83,47 @@ class SQLObject
   end
 
   def attribute_values
-    self.class.columns.map { |col| send(col) }
+    columns.map { |col| send(col) }
   end
 
   def insert
-    columns = self.class.columns
-
-    table_name = self.class.table_name
     cols_name = columns.join(', ')
     question_marks = (["?"] * columns.size).join(', ')
 
-    results = DBConnection.execute(<<-SQL, *attribute_values)
+    DBConnection.execute(<<-SQL, *attribute_values)
       INSERT INTO
         #{table_name}(#{cols_name})
       VALUES
         (#{question_marks})
     SQL
 
-
     self.id = DBConnection.last_insert_row_id
   end
 
   def update
-    # ...
+    set = columns.map { |col| "#{col} = ?" }.join(', ')
+
+    DBConnection.execute(<<-SQL, *attribute_values, id)
+      UPDATE
+        #{table_name}
+      SET
+        #{set}
+      WHERE
+        id = ?
+    SQL
   end
 
   def save
     # ...
   end
 
+  private
+
+  def columns
+    self.class.columns
+  end
+
+  def table_name
+    self.class.table_name
+  end
 end
