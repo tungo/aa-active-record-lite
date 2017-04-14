@@ -101,13 +101,13 @@ class SQLObject
   end
 
   def update
-    set = columns.map { |col| "#{col} = ?" }.join(', ')
+    set_line = columns.map { |col| "#{col} = ?" }.join(', ')
 
     DBConnection.execute(<<-SQL, *attribute_values, id)
       UPDATE
         #{table_name}
       SET
-        #{set}
+        #{set_line}
       WHERE
         id = ?
     SQL
