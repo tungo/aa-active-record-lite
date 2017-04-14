@@ -28,7 +28,6 @@ class SQLObject
 
   def self.table_name
     @table_name ||= name.tableize
-    @table_name
   end
 
   def self.all
@@ -47,7 +46,7 @@ class SQLObject
   end
 
   def attributes
-    # ...
+    @attributes ||= {}
   end
 
   def attribute_values
