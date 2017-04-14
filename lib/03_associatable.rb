@@ -20,7 +20,16 @@ end
 
 class BelongsToOptions < AssocOptions
   def initialize(name, options = {})
-    # ...
+    default = {
+      class_name: name.to_s.singularize.camelcase,
+      primary_key: :id,
+      foreign_key: "#{name.to_s.singularize}_id".to_sym
+    }
+    options = default.merge(options)
+
+    options.each do |key, value|
+      send("#{key}=", value)
+    end
   end
 end
 
