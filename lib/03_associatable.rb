@@ -51,7 +51,32 @@ end
 module Associatable
   # Phase IIIb
   def belongs_to(name, options = {})
-    # ...
+    # store BelongsToOptions object to class variable
+    # e.g. Cat.assoc_options[:owner] is a BTO object
+    self.assoc_options[name] = BelongsToOptions(name, options)
+
+    # define association method for instance
+    # e.g. cat1.owner
+    define_method(name) do
+      # access BelongsToOptions object from class
+      # e.g. cat1 can access Cat.assoc_options[:owner]
+      options = self.class.assoc_options[name]
+
+      # get value of foreign_key of instance
+      # e.g. options.foreign_key is owner_id => cat1.owner_id
+      f_key_value = self.send(options.foreign_key)
+
+      # get result from the association
+      # e.g.
+      # options.model_class => Human
+      # options.primary_key => id
+      # f_key_value => cat1.owner_id == 10
+      # .where() => Human.where(id => 10)
+      options
+        .model_class
+        .where(options.primary_key => f_key_value)
+        .first
+    end
   end
 
   def has_many(name, options = {})
